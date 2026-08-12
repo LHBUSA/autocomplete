@@ -306,6 +306,11 @@ export default function Home() {
             <span className="ready-badge"><i /> PRODUCTION ARCHITECTURE</span>
           </div>
           <div className="experience-console">
+            <div className="demo-live-banner">
+              <span><i /> LIVE / CLICKABLE</span>
+              <strong>Choose a stage. Change the property. Watch the decision update.</strong>
+              <small>BLUE + RED CONTROLS ARE ACTIVE</small>
+            </div>
             <div className="console-tabs" role="tablist" aria-label="Property decision stages">
               {demoStages.map((stage, index) => (
                 <button
@@ -333,7 +338,7 @@ export default function Home() {
               <span className="latency"><i /> {selectedProperty.latency} MS</span>
             </div>
             <div className="demo-context-bar">
-              <span><i /> GUIDED LIVE PRODUCT DEMO</span>
+              <span><i /> LIVE CONTROLS · PICK A SAMPLE</span>
               <div aria-label="Demo properties">
                 {suggestions.map((property, index) => (
                   <button
@@ -348,12 +353,12 @@ export default function Home() {
                   >0{index + 1} · {property.address.split(" ")[0]}</button>
                 ))}
               </div>
-              <em>Controlled sample records · values illustrative</em>
+              <em>Every selection updates the response</em>
             </div>
             <div className="console-body">
               <div className="search-pane" id="address-autocomplete">
                 <div className="pane-heading"><span>PROPERTY SEARCH</span><span>CANONICAL MATCH REQUIRED</span></div>
-                <label htmlFor="hero-address">Start with an address</label>
+                <label htmlFor="hero-address"><span>Start with an address</span><em>TYPE HERE ↘</em></label>
                 <div className="search-control">
                   <span className="search-glyph">⌕</span>
                   <input
@@ -401,7 +406,7 @@ export default function Home() {
 
               <div className="decision-pane" id="instant-value">
                 <div className="decision-toolbar">
-                  <span>DECISION RESPONSE</span>
+                  <span>DECISION RESPONSE <em>SWITCH MODE →</em></span>
                   <div className="mode-toggle" aria-label="Decision response mode">
                     <button type="button" className={heroMode === "value" ? "active" : ""} onClick={() => { setHeroMode("value"); setActiveStage("Value"); }}>Value</button>
                     <button type="button" className={heroMode === "offer" ? "active" : ""} onClick={() => { setHeroMode("offer"); setActiveStage("Offer"); }}>Offer</button>
