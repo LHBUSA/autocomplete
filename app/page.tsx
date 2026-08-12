@@ -21,7 +21,7 @@ const suggestions = [
     type: "Single-family residence",
   },
   {
-    address: "10552 KENTUCKY AVE S, BLOOMINGTON, MN 55438",
+    address: "10552 KENTUCKY AVE S, BLOOMINGTON, MN 55438", 
     meta: "Nearby canonical match · Hennepin County",
     type: "Single-family residence",
   },
