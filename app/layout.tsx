@@ -1,25 +1,34 @@
 import type { Metadata } from "next";
-import { Manrope, IBM_Plex_Mono } from "next/font/google";
+import { DM_Mono, Geist, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 
-const manrope = Manrope({
-  variable: "--font-manrope",
+const geist = Geist({
+  variable: "--font-geist",
   subsets: ["latin"],
 });
 
-const plexMono = IBM_Plex_Mono({
-  variable: "--font-plex-mono",
+const dmMono = DM_Mono({
+  variable: "--font-dm-mono",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500"],
+});
+
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-instrument-serif",
+  subsets: ["latin"],
+  weight: "400",
 });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://autocomplete.proptechusa.ai"),
+  alternates: {
+    canonical: "/",
+  },
   title: "Autocomplete to Instant Value | PropData",
   description:
     "Turn an address into an instant property value or a customer-specific instant offer with PropData autocomplete, parcel resolution, enrichment, and custom rules.",
   keywords: [
-    "property address autocomplete",
+    "property address autocomplete API",
     "instant home value API",
     "instant offer API",
     "property valuation widget",
@@ -33,15 +42,21 @@ export const metadata: Metadata = {
     type: "website",
     url: "https://autocomplete.proptechusa.ai",
     siteName: "PropData Instant Value",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "PropData Autocomplete to Instant Value",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Autocomplete to Instant Value | PropData",
     description:
       "Turn an address into a real-time property value or a customized instant offer.",
-  },
-  other: {
-    "codex-preview": "development",
+    images: ["/opengraph-image"],
   },
   icons: {
     icon: "/favicon.svg",
@@ -62,6 +77,13 @@ const structuredData = {
     name: "PropTechUSA.ai",
     url: "https://www.proptechusa.ai",
   },
+  url: "https://autocomplete.proptechusa.ai",
+  offers: {
+    "@type": "Offer",
+    price: "79",
+    priceCurrency: "USD",
+    description: "Self-serve API access from $79 per month; custom enterprise implementations available.",
+  },
   featureList: [
     "Address autocomplete",
     "Parcel resolution",
@@ -74,8 +96,8 @@ const structuredData = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body className={`${manrope.variable} ${plexMono.variable}`}>
+    <html lang="en" className={`${geist.variable} ${dmMono.variable} ${instrumentSerif.variable}`}>
+      <body>
         {children}
         <script
           type="application/ld+json"
