@@ -9,7 +9,7 @@ const propDataUrl = "https://propdata.proptechusa.ai";
 const workspaceUrl = "https://propdata.proptechusa.ai/dashboard";
 const docsUrl = "https://propdata.proptechusa.ai/docs";
 const pricingUrl = "https://propdata.proptechusa.ai/#pricing";
-const termsUrl = "https://propdata.proptechusa.ai/terms";
+const termsUrl = "https://www.proptechusa.ai/terms";
 const statusUrl = "https://www.proptechusa.ai/status";
 const companyUrl = "https://www.proptechusa.ai";
 const propSecureUrl = "https://propsecure.proptechusa.ai";
@@ -813,6 +813,7 @@ curl -X POST \\
               <a href={billingUrl} target="_blank" rel="noreferrer">Customer billing ↗</a>
               <a href={statusUrl}>System status</a>
               <a href="mailto:sales@proptechusa.ai">sales@proptechusa.ai</a>
+              <a href="tel:+18887843881">1-888-784-3881</a>
               <a href="#faq">FAQ</a>
               <a href={calendlyUrl} target="_blank" rel="noreferrer">Book integration ↗</a>
             </div>
