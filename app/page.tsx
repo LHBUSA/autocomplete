@@ -5,29 +5,96 @@ import { useMemo, useState } from "react";
 const rapidApiUrl =
   "https://rapidapi.com/propdata-propdata-default/api/propdata-address-autocomplete-avm-api";
 const calendlyUrl = "https://calendly.com/proptechusa";
+const propDataUrl = "https://propdata.proptechusa.ai";
+const workspaceUrl = "https://propdata.proptechusa.ai/dashboard";
 const docsUrl = "https://propdata.proptechusa.ai/docs";
+const pricingUrl = "https://propdata.proptechusa.ai/#pricing";
+const termsUrl = "https://propdata.proptechusa.ai/terms";
 const statusUrl = "https://www.proptechusa.ai/status";
 const companyUrl = "https://www.proptechusa.ai";
+const propSecureUrl = "https://propsecure.proptechusa.ai";
+const propSportsUrl = "https://propsports.proptechusa.ai";
+const billingUrl =
+  "https://billing.stripe.com/p/login/cNi3cv2vY7em3lr4oj7wA00";
 
-const suggestions = [
+type DemoProperty = {
+  id: string;
+  address: string;
+  city: string;
+  meta: string;
+  type: string;
+  county: string;
+  matchId: string;
+  value: number;
+  rangeLow: number;
+  rangeHigh: number;
+  latency: number;
+  beds: number;
+  baths: number;
+  livingArea: number;
+  yearBuilt: number;
+  lotSqft: number;
+};
+
+const suggestions: DemoProperty[] = [
   {
+    id: "kentucky-10548",
     address: "10548 KENTUCKY AVE S, BLOOMINGTON, MN 55438",
+    city: "Bloomington, MN 55438",
     meta: "Canonical property match · Hennepin County",
     type: "Single-family residence",
+    county: "Hennepin",
+    matchId: "PD-DEMO-MN-10548",
+    value: 512400,
+    rangeLow: 486000,
+    rangeHigh: 538000,
+    latency: 184,
+    beds: 4,
+    baths: 3,
+    livingArea: 2340,
+    yearBuilt: 1978,
+    lotSqft: 10890,
   },
   {
+    id: "kentucky-10544",
     address: "10544 KENTUCKY AVE S, BLOOMINGTON, MN 55438",
+    city: "Bloomington, MN 55438",
     meta: "Nearby canonical match · Hennepin County",
     type: "Single-family residence",
+    county: "Hennepin",
+    matchId: "PD-DEMO-MN-10544",
+    value: 498800,
+    rangeLow: 474000,
+    rangeHigh: 523000,
+    latency: 171,
+    beds: 4,
+    baths: 2,
+    livingArea: 2180,
+    yearBuilt: 1977,
+    lotSqft: 10454,
   },
   {
-    address: "10552 KENTUCKY AVE S, BLOOMINGTON, MN 55438", 
+    id: "kentucky-10552",
+    address: "10552 KENTUCKY AVE S, BLOOMINGTON, MN 55438",
+    city: "Bloomington, MN 55438",
     meta: "Nearby canonical match · Hennepin County",
     type: "Single-family residence",
+    county: "Hennepin",
+    matchId: "PD-DEMO-MN-10552",
+    value: 529100,
+    rangeLow: 503000,
+    rangeHigh: 555000,
+    latency: 196,
+    beds: 5,
+    baths: 3,
+    livingArea: 2510,
+    yearBuilt: 1979,
+    lotSqft: 11326,
   },
 ];
 
-const baseValue = 512400;
+const demoStages = ["Search", "Resolve", "Value", "Offer"] as const;
+type DemoStage = (typeof demoStages)[number];
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("en-US", {
@@ -37,32 +104,68 @@ function formatCurrency(value: number) {
   }).format(value);
 }
 
-function ShieldMark({ compact = false }: { compact?: boolean }) {
+type ShieldProduct = "autocomplete" | "propdata" | "propsecure" | "propsports" | "platform";
+
+function ProductShield({
+  product = "autocomplete",
+  compact = false,
+}: {
+  product?: ShieldProduct;
+  compact?: boolean;
+}) {
   return (
-    <span className={compact ? "shield-mark compact" : "shield-mark"} aria-hidden="true">
-      <svg viewBox="0 0 44 48" focusable="false">
-        <defs>
-          <linearGradient id={compact ? "shield-blue-small" : "shield-blue"} x1="7" y1="4" x2="37" y2="44" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stopColor="#0b1f3a" />
-            <stop offset=".58" stopColor="#143f91" />
-            <stop offset="1" stopColor="#2563eb" />
-          </linearGradient>
-          <clipPath id={compact ? "shield-clip-small" : "shield-clip"}>
-            <path d="M22 3.5 39.3 9.6v11.7c0 11.6-6.7 20.1-17.3 24.3C11.4 41.4 4.7 32.9 4.7 21.3V9.6Z" />
-          </clipPath>
-        </defs>
-        <path d="M22 1.5 41 8.3v13c0 12.6-7.4 21.7-19 26C10.4 43 3 33.9 3 21.3v-13Z" fill="none" stroke="#2563eb" strokeWidth="1" opacity=".28" />
-        <path d="M22 3.5 39.3 9.6v11.7c0 11.6-6.7 20.1-17.3 24.3C11.4 41.4 4.7 32.9 4.7 21.3V9.6Z" fill={`url(#${compact ? "shield-blue-small" : "shield-blue"})`} stroke="#082249" strokeWidth="1.5" />
-        <path d="M22 6.6 36.2 11.6v9.5c0 9.5-5.1 16.5-14.2 20.5-9.1-4-14.2-11-14.2-20.5v-9.5Z" fill="none" stroke="#c6dcff" strokeWidth="1" opacity=".94" />
-        <g clipPath={`url(#${compact ? "shield-clip-small" : "shield-clip"})`}>
-          <rect x="11.2" y="25" width="5.6" height="12" rx="1.5" fill="#ef3340" />
-          <rect x="19.2" y="20" width="5.6" height="17" rx="1.5" fill="#fff" />
-          <rect x="27.2" y="14" width="5.6" height="23" rx="1.5" fill="#7db5ff" />
-        </g>
-        <path d="m12.4 12.2 9.6-3.4 9.6 3.4" fill="none" stroke="#ef3340" strokeWidth="1.3" strokeLinecap="round" />
+    <span
+      className={`${compact ? "shield-mark compact" : "shield-mark"} shield-${product}`}
+      aria-hidden="true"
+    >
+      <svg viewBox="0 0 64 68" focusable="false">
+        <path d="M32 2 58 11v18c0 17-10.1 29.7-26 36.6C16.1 58.7 6 46 6 29V11Z" fill="#fff" stroke="#dce7f4" strokeWidth="2" />
+        <path d="M32 6 54 13.6v15c0 14.2-7.8 24.9-22 31.6-14.2-6.7-22-17.4-22-31.6v-15Z" fill="currentColor" stroke="#0a2548" strokeWidth="2.4" />
+        <path d="M32 10.2 50 16.4v12.2c0 11.6-6 20.5-18 26.5-12-6-18-14.9-18-26.5V16.4Z" fill="none" stroke="#a9c9ff" strokeWidth="1.4" opacity=".92" />
+        {product === "autocomplete" && (
+          <g>
+            <rect x="17" y="23" width="30" height="13" rx="4" fill="#fff" />
+            <circle cx="24" cy="29.5" r="3.1" fill="none" stroke="#2563eb" strokeWidth="2" />
+            <path d="m26.4 32 3.1 3" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" />
+            <path d="m35 39 10 4.8-4.6 2-2.1 5.2Z" fill="#ef3340" stroke="#fff" strokeWidth="1" strokeLinejoin="round" />
+          </g>
+        )}
+        {product === "propdata" && (
+          <g>
+            <rect x="18" y="34" width="6" height="12" rx="1.6" fill="#ef3340" />
+            <rect x="29" y="27" width="6" height="19" rx="1.6" fill="#fff" />
+            <rect x="40" y="20" width="6" height="26" rx="1.6" fill="#7db5ff" />
+            <path d="m18 23 14-6 14 6" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
+          </g>
+        )}
+        {product === "propsecure" && (
+          <g fill="none" stroke="#fff" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m19 31 13-11 13 11v15H19Z" strokeWidth="3" />
+            <path d="m27 37 4 4 8-9" stroke="#58e09b" strokeWidth="3.5" />
+          </g>
+        )}
+        {product === "propsports" && (
+          <g>
+            <circle cx="32" cy="33" r="14" fill="#fff" />
+            <path d="M18.5 30.5c9 1 18 7 27 5M27 20c4 8 4 18 0 26M38 21c-5 6-7 16-4 25" fill="none" stroke="#2563eb" strokeWidth="2" />
+            <path d="M19 38c7-1 17 2 23 7" fill="none" stroke="#ef3340" strokeWidth="2" />
+          </g>
+        )}
+        {product === "platform" && (
+          <g fill="#fff">
+            <circle cx="32" cy="22" r="4" />
+            <circle cx="21" cy="41" r="4" />
+            <circle cx="43" cy="41" r="4" />
+            <path d="M30.5 25.5 23 37m10.5-11.5L41 37M25 41h14" fill="none" stroke="#7db5ff" strokeWidth="2.5" />
+          </g>
+        )}
       </svg>
     </span>
   );
+}
+
+function ShieldMark({ compact = false }: { compact?: boolean }) {
+  return <ProductShield compact={compact} product="autocomplete" />;
 }
 
 function Brand({ footer = false }: { footer?: boolean }) {
@@ -80,13 +183,18 @@ function Brand({ footer = false }: { footer?: boolean }) {
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("10548 Kentucky Ave S");
-  const [selected, setSelected] = useState(0);
+  const [selected, setSelected] = useState(suggestions[0].id);
   const [heroMode, setHeroMode] = useState<"value" | "offer">("value");
-  const [activeStage, setActiveStage] = useState("Value");
+  const [activeStage, setActiveStage] = useState<DemoStage>("Value");
   const [offerBasis, setOfferBasis] = useState(82);
   const [repairs, setRepairs] = useState(18000);
   const [fees, setFees] = useState(6000);
-  const [responseView, setResponseView] = useState<"parsed" | "json">("parsed");
+  const [responseView, setResponseView] = useState<"parsed" | "json" | "curl">("parsed");
+
+  const selectedProperty =
+    suggestions.find((property) => property.id === selected) ?? suggestions[0];
+  const baseValue = selectedProperty.value;
+  const activeStageIndex = demoStages.indexOf(activeStage);
 
   const filteredSuggestions = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -101,8 +209,6 @@ export default function Home() {
     0,
     Math.round((baseValue * (offerBasis / 100) - repairs - fees) / 100) * 100,
   );
-
-  const selectedProperty = suggestions[selected] ?? suggestions[0];
 
   return (
     <main>
@@ -132,18 +238,28 @@ export default function Home() {
           </div>
           <a className="nav-link" href="#developers" onClick={() => setMenuOpen(false)}>Developers</a>
           <a className="nav-link" href="#pricing" onClick={() => setMenuOpen(false)}>Pricing</a>
+          <div className="nav-group">
+            <a className="nav-link" href="#shield-network" onClick={() => setMenuOpen(false)}>Shield Network <span>⌄</span></a>
+            <div className="nav-menu compact-menu ecosystem-menu">
+              <a href={propDataUrl}><b>PropData</b><small>Flagship property intelligence infrastructure.</small></a>
+              <a href={propSecureUrl}><b>PropSecure</b><small>Enterprise property surveillance and risk signals.</small></a>
+              <a href={propSportsUrl}><b>PropSports</b><small>Live sports data, odds, and Statcast infrastructure.</small></a>
+              <a href={companyUrl}><b>PropTechUSA.ai</b><small>Explore the complete independent data ecosystem.</small></a>
+            </div>
+          </div>
           <div className="nav-group resources-group">
             <a className="nav-link" href="#faq" onClick={() => setMenuOpen(false)}>Resources <span>⌄</span></a>
             <div className="nav-menu compact-menu">
               <a href="#faq" onClick={() => setMenuOpen(false)}><b>Frequently asked questions</b><small>How identity, values, offers, and delivery work.</small></a>
-              <a href={docsUrl} target="_blank" rel="noreferrer"><b>Developer docs ↗</b><small>Explore the PropData API documentation.</small></a>
-              <a href={statusUrl} target="_blank" rel="noreferrer"><b>Platform status ↗</b><small>See current API availability.</small></a>
+              <a href={workspaceUrl}><b>API Workspace</b><small>Build and inspect a production request.</small></a>
+              <a href={docsUrl}><b>Developer docs</b><small>Explore the PropData API documentation.</small></a>
+              <a href={statusUrl}><b>Platform status</b><small>See current API availability.</small></a>
             </div>
           </div>
         </nav>
         <div className="header-actions">
           <a className="status-pill desktop-only" href={statusUrl} target="_blank" rel="noreferrer"><i /> API Operational</a>
-          <a className="button outline desktop-only" href={docsUrl} target="_blank" rel="noreferrer">Docs</a>
+          <a className="button outline desktop-only" href={workspaceUrl}>API Workspace</a>
           <a className="button blue desktop-only" href={calendlyUrl} target="_blank" rel="noreferrer">Book an Integration</a>
           <button
             className="menu-button"
@@ -191,21 +307,48 @@ export default function Home() {
           </div>
           <div className="experience-console">
             <div className="console-tabs" role="tablist" aria-label="Property decision stages">
-              {["Search", "Resolve", "Value", "Offer"].map((stage, index) => (
+              {demoStages.map((stage, index) => (
                 <button
                   key={stage}
                   type="button"
                   role="tab"
                   aria-selected={activeStage === stage}
-                  className={activeStage === stage ? "active" : ""}
-                  onClick={() => setActiveStage(stage)}
-                ><span>0{index + 1}</span>{stage}<small>{stage === "Search" ? "autocomplete" : stage === "Resolve" ? "canonical" : stage === "Value" ? "AVM" : "rules"}</small></button>
+                  className={`${activeStage === stage ? "active" : ""} ${index < activeStageIndex ? "complete" : ""}`.trim()}
+                  onClick={() => {
+                    setActiveStage(stage);
+                    if (stage === "Value") setHeroMode("value");
+                    if (stage === "Offer") setHeroMode("offer");
+                  }}
+                ><span>{index < activeStageIndex ? "✓" : `0${index + 1}`}</span>{stage}<small>{stage === "Search" ? "autocomplete" : stage === "Resolve" ? "canonical" : stage === "Value" ? "AVM" : "rules"}</small></button>
               ))}
             </div>
             <div className="console-urlbar">
               <span className="traffic-lights"><i /><i /><i /></span>
-              <code>autocomplete.proptechusa.ai / property-decision</code>
-              <span className="latency"><i /> 184 MS</span>
+              <code>
+                {activeStage === "Search" && "GET /v1/autocomplete"}
+                {activeStage === "Resolve" && "GET /v1/property?enrich=full"}
+                {activeStage === "Value" && "GET /v1/estimate"}
+                {activeStage === "Offer" && "CUSTOM /v1/property-decision"}
+              </code>
+              <span className="latency"><i /> {selectedProperty.latency} MS</span>
+            </div>
+            <div className="demo-context-bar">
+              <span><i /> GUIDED LIVE PRODUCT DEMO</span>
+              <div aria-label="Demo properties">
+                {suggestions.map((property, index) => (
+                  <button
+                    key={property.id}
+                    type="button"
+                    className={selected === property.id ? "active" : ""}
+                    onClick={() => {
+                      setSelected(property.id);
+                      setQuery(property.address.split(",")[0]);
+                      setActiveStage("Resolve");
+                    }}
+                  >0{index + 1} · {property.address.split(" ")[0]}</button>
+                ))}
+              </div>
+              <em>Controlled sample records · values illustrative</em>
             </div>
             <div className="console-body">
               <div className="search-pane" id="address-autocomplete">
@@ -225,30 +368,34 @@ export default function Home() {
                   />
                   <kbd>⌘ K</kbd>
                 </div>
+                <div className="match-caption">
+                  <span>{filteredSuggestions.length} canonical match{filteredSuggestions.length === 1 ? "" : "es"}</span>
+                  <span>Hennepin County · MN</span>
+                </div>
                 <div className="match-list" role="listbox" aria-label="Illustrative property matches">
-                  {filteredSuggestions.map((item, index) => (
+                  {filteredSuggestions.map((item) => (
                     <button
-                      key={item.address}
+                      key={item.id}
                       type="button"
                       role="option"
-                      aria-selected={selected === index}
-                      className={selected === index ? "match active" : "match"}
+                      aria-selected={selected === item.id}
+                      className={selected === item.id ? "match active" : "match"}
                       onClick={() => {
-                        setSelected(index);
-                        setQuery(item.address);
+                        setSelected(item.id);
+                        setQuery(item.address.split(",")[0]);
                         setActiveStage("Resolve");
                       }}
                     >
                       <span className="match-pin">⌖</span>
-                      <span><b>{item.address}</b><small>{item.meta}</small></span>
-                      {selected === index ? <span className="match-check">✓</span> : <span className="match-arrow">→</span>}
+                      <span><b>{item.address}</b><small>{item.meta} · {item.type}</small></span>
+                      {selected === item.id ? <span className="match-check">✓</span> : <span className="match-arrow">→</span>}
                     </button>
                   ))}
                 </div>
                 <div className="resolution-row">
                   <div><span>IDENTITY</span><b><i /> Resolved</b></div>
-                  <div><span>COUNTY</span><b>Hennepin</b></div>
-                  <div><span>DELIVERY</span><b>Offer-ready</b></div>
+                  <div><span>COUNTY</span><b>{selectedProperty.county}</b></div>
+                  <div><span>MATCH ID</span><b>{selectedProperty.matchId}</b></div>
                 </div>
               </div>
 
@@ -261,21 +408,39 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="property-identity">
-                  <span className="house-icon">⌂</span>
-                  <span><small>CANONICAL PROPERTY</small><b>{selectedProperty.address.split(",")[0]}</b><em>Bloomington, MN 55438 · Hennepin County</em></span>
+                  <span className="house-icon"><ShieldMark compact /></span>
+                  <span><small>CANONICAL PROPERTY</small><b>{selectedProperty.address.split(",")[0]}</b><em>{selectedProperty.city} · {selectedProperty.county} County</em></span>
                   <span className="confidence-badge">HIGH CONFIDENCE</span>
+                </div>
+                <div className="property-spec-grid" aria-label="Illustrative property characteristics">
+                  <span><small>BEDS</small><b>{selectedProperty.beds}</b></span>
+                  <span><small>BATHS</small><b>{selectedProperty.baths}</b></span>
+                  <span><small>LIVING AREA</small><b>{selectedProperty.livingArea.toLocaleString()} ft²</b></span>
+                  <span><small>YEAR</small><b>{selectedProperty.yearBuilt}</b></span>
+                  <span><small>LOT</small><b>{selectedProperty.lotSqft.toLocaleString()} ft²</b></span>
                 </div>
                 <div className="decision-number">
                   <small>{heroMode === "value" ? "ILLUSTRATIVE INSTANT VALUE" : "ILLUSTRATIVE INSTANT OFFER"}</small>
                   <strong>{formatCurrency(heroMode === "value" ? baseValue : instantOffer)}</strong>
-                  <span>{heroMode === "value" ? "Range $486,000–$538,000" : `${offerBasis}% basis · repairs and costs applied`}</span>
+                  <span>{heroMode === "value" ? `Range ${formatCurrency(selectedProperty.rangeLow)}–${formatCurrency(selectedProperty.rangeHigh)}` : `${offerBasis}% basis · repairs and costs applied`}</span>
                 </div>
                 <div className="decision-signals">
                   <div><span>PROPERTY</span><b>Canonical</b><small>One identity selected</small></div>
                   <div><span>VALUATION</span><b>Current contract</b><small>Estimate + confidence</small></div>
                   <div><span>NEXT ACTION</span><b>{heroMode === "value" ? "Lead capture" : "Offer review"}</b><small>Customer-configured</small></div>
                 </div>
-                <button type="button" className="decision-cta">{heroMode === "value" ? "See my property value" : "Review this offer"}<span>→</span></button>
+                <button
+                  type="button"
+                  className="decision-cta"
+                  onClick={() => {
+                    if (heroMode === "value") {
+                      setHeroMode("offer");
+                      setActiveStage("Offer");
+                    } else {
+                      document.getElementById("instant-offer")?.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }}
+                >{heroMode === "value" ? "Model an instant offer" : "Open the offer studio"}<span>→</span></button>
               </div>
             </div>
             <div className="console-foot">
@@ -353,11 +518,20 @@ export default function Home() {
             <span><b>PROPDATA OFFER STUDIO</b><small>Illustrative customer ruleset</small></span>
             <span className="studio-state"><i /> CONFIGURATION ACTIVE</span>
           </div>
+          <div className="studio-pipeline" aria-label="Offer decision pipeline">
+            <span className="complete"><i>01</i><b>Identity</b><small>canonical</small></span>
+            <em>→</em>
+            <span className="complete"><i>02</i><b>Value</b><small>{formatCurrency(baseValue)}</small></span>
+            <em>→</em>
+            <span className="active"><i>03</i><b>Rules</b><small>customer model</small></span>
+            <em>→</em>
+            <span><i>04</i><b>Route</b><small>CRM + review</small></span>
+          </div>
           <div className="studio-body">
             <div className="studio-controls">
               <div className="studio-property">
                 <ShieldMark compact />
-                <span><small>APPROVED VALUE INPUT</small><b>{formatCurrency(baseValue)}</b><em>High-confidence illustrative estimate</em></span>
+                <span><small>APPROVED VALUE INPUT</small><b>{formatCurrency(baseValue)}</b><em>{selectedProperty.address}</em></span>
               </div>
               <div className="preset-row" aria-label="Offer strategy presets">
                 {[["Conservative", 78], ["Balanced", 82], ["Aggressive", 86]].map(([label, value]) => (
@@ -383,6 +557,7 @@ export default function Home() {
 
             <div className="studio-result" aria-live="polite">
               <div className="result-top"><span>INSTANT OFFER RESPONSE</span><span><i /> READY</span></div>
+              <div className="result-identity"><span>{selectedProperty.matchId}</span><b>{selectedProperty.address.split(",")[0]}</b></div>
               <small className="result-label">CUSTOMER-FACING OFFER</small>
               <strong>{formatCurrency(instantOffer)}</strong>
               <p>Calculated from the approved value and the active illustrative customer ruleset.</p>
@@ -425,26 +600,43 @@ export default function Home() {
           <div className="developer-actions"><a className="button red large" href={calendlyUrl} target="_blank" rel="noreferrer">Book an Integration →</a><a className="button dark-outline large" href={docsUrl} target="_blank" rel="noreferrer">Read the Docs</a></div>
         </div>
         <div className="response-explorer">
-          <div className="response-head"><span><i /> PROPERTY DECISION RESPONSE</span><div><button type="button" className={responseView === "parsed" ? "active" : ""} onClick={() => setResponseView("parsed")}>PARSED</button><button type="button" className={responseView === "json" ? "active" : ""} onClick={() => setResponseView("json")}>JSON</button></div></div>
-          <div className="response-route"><span className="traffic-lights"><i /><i /><i /></span><code>POST /v1/property-decision</code><b>200 OK</b></div>
+          <div className="response-head"><span><i /> PROPERTY DECISION RESPONSE</span><div><button type="button" className={responseView === "parsed" ? "active" : ""} onClick={() => setResponseView("parsed")}>PARSED</button><button type="button" className={responseView === "json" ? "active" : ""} onClick={() => setResponseView("json")}>JSON</button><button type="button" className={responseView === "curl" ? "active" : ""} onClick={() => setResponseView("curl")}>cURL</button></div></div>
+          <div className="endpoint-chain" aria-label="Production request sequence">
+            <span><i>01</i><b>/v1/autocomplete</b><small>rank</small></span>
+            <em>→</em>
+            <span><i>02</i><b>/v1/property</b><small>resolve + enrich</small></span>
+            <em>→</em>
+            <span><i>03</i><b>/v1/estimate</b><small>value</small></span>
+            <em>→</em>
+            <span className="active"><i>04</i><b>custom contract</b><small>decision</small></span>
+          </div>
+          <div className="response-route"><span className="traffic-lights"><i /><i /><i /></span><code>CUSTOM /v1/property-decision</code><b>200 OK · {selectedProperty.latency} MS</b></div>
           {responseView === "parsed" ? (
             <div className="parsed-response">
-              <div className="parsed-title"><span><small>CANONICAL PROPERTY</small><b>10548 Kentucky Ave S</b><em>Bloomington, MN 55438</em></span><span className="parsed-status">READY</span></div>
+              <div className="parsed-title"><span><small>CANONICAL PROPERTY</small><b>{selectedProperty.address.split(",")[0]}</b><em>{selectedProperty.city}</em></span><span className="parsed-status">READY</span></div>
               <div className="parsed-stats"><span><small>IDENTITY</small><b>Canonical</b></span><span><small>VALUE</small><b>{formatCurrency(baseValue)}</b></span><span><small>OFFER</small><b>{formatCurrency(instantOffer)}</b></span></div>
               <div className="parsed-table">
-                <span><small>match</small><b>canonical_address</b></span><span><small>valuation.confidence</small><b>high</b></span><span><small>decision.ruleset</small><b>customer_approved_v3</b></span><span><small>next_action.type</small><b>lead_capture</b></span>
+                <span><small>property.match_id</small><b>{selectedProperty.matchId}</b></span><span><small>valuation.confidence</small><b>high</b></span><span><small>decision.ruleset</small><b>customer_approved_v3</b></span><span><small>next_action.type</small><b>offer_review</b></span>
               </div>
               <div className="parsed-note"><i /> SAMPLE CONTRACT · VALUES ILLUSTRATIVE</div>
             </div>
-          ) : (
+          ) : responseView === "json" ? (
             <pre><code>{`{
   "sample_contract": true,
   "property": {
-    "canonical_address": "10548 KENTUCKY AVE S, BLOOMINGTON, MN 55438",
-    "match": "canonical_address"
+    "match_id": "${selectedProperty.matchId}",
+    "canonical_address": "${selectedProperty.address}",
+    "match": "canonical_address",
+    "characteristics": {
+      "beds": ${selectedProperty.beds},
+      "baths": ${selectedProperty.baths},
+      "living_area_sqft": ${selectedProperty.livingArea}
+    }
   },
   "valuation": {
     "estimate": ${baseValue},
+    "range_low": ${selectedProperty.rangeLow},
+    "range_high": ${selectedProperty.rangeHigh},
     "confidence": "high",
     "illustrative": true
   },
@@ -453,8 +645,22 @@ export default function Home() {
     "offer": ${instantOffer},
     "ruleset": "customer_approved_v3"
   },
-  "next_action": { "type": "lead_capture" }
+  "next_action": { "type": "offer_review" }
 }`}</code></pre>
+          ) : (
+            <pre><code>{`# Server-side custom decision contract
+curl -X POST \\
+  "https://api.yourbrand.com/v1/property-decision" \\
+  -H "Authorization: Bearer $YOUR_SERVER_TOKEN" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "address": "${selectedProperty.address}",
+    "mode": "instant_offer",
+    "ruleset": "customer_approved_v3"
+  }'
+
+# PropData credentials remain server-side.
+# Response shape, sources, and decision logic are customer-approved.`}</code></pre>
           )}
           <div className="response-foot">Example customizable response shape. Production fields and logic follow the customer&apos;s approved contract.</div>
         </div>
@@ -485,6 +691,64 @@ export default function Home() {
           <article><span className="plan-label">SELF-SERVE</span><h3>API Access</h3><strong>From $79<small>/month</small></strong><p>For developers building the product experience inside their own stack.</p><ul><li>Address autocomplete</li><li>Property resolution</li><li>Plan-based data access</li><li>Developer documentation</li></ul><a className="button outline large" href={rapidApiUrl} target="_blank" rel="noreferrer">View API Options →</a></article>
           <article className="featured-plan"><span className="plan-label">CUSTOM EXPERIENCE</span><h3>Instant Value</h3><strong>Custom</strong><p>For teams launching a branded address-to-value funnel with qualification and routing.</p><ul><li>Branded customer journey</li><li>Value + confidence contract</li><li>Lead qualification and CRM handoff</li><li>Implementation support</li></ul><a className="button red large" href={calendlyUrl} target="_blank" rel="noreferrer">Design My Value Flow →</a></article>
           <article><span className="plan-label">CUSTOM + RULES</span><h3>Instant Offer</h3><strong>Custom</strong><p>For acquisition teams applying approved eligibility and economics to property value.</p><ul><li>Customer-defined offer model</li><li>Market + asset eligibility</li><li>Disclosures and next actions</li><li>CRM, webhook, or custom handoff</li></ul><a className="button blue large" href={calendlyUrl} target="_blank" rel="noreferrer">Scope an Offer Flow →</a></article>
+        </div>
+      </section>
+
+      <section className="shield-network" id="shield-network">
+        <div className="network-heading">
+          <div>
+            <div className="section-kicker"><i /> THE PROPTECHUSA.AI SHIELD NETWORK</div>
+            <h2>Focused products. One independent infrastructure ecosystem.</h2>
+          </div>
+          <div className="network-intro">
+            <p>Every shield represents a focused product surface backed by the same standard: clear identity, inspectable infrastructure, and direct access to the builders behind it.</p>
+            <a href={companyUrl}>Explore the parent platform →</a>
+          </div>
+        </div>
+
+        <div className="shield-grid" aria-label="PropTechUSA product ecosystem">
+          <a className="shield-card current" href="#top" aria-current="page">
+            <div className="shield-card-top"><ProductShield product="autocomplete" /><span>CURRENT PRODUCT</span></div>
+            <small>ADDRESS DECISIONING</small>
+            <h3>Autocomplete</h3>
+            <p>Turn one selected address into canonical property identity, an instant value, or a customer-controlled offer.</p>
+            <div><b>ADDRESS → ACTION</b><span>Explore this page ↑</span></div>
+          </a>
+          <a className="shield-card" href={propDataUrl}>
+            <div className="shield-card-top"><ProductShield product="propdata" /><span>FLAGSHIP INFRASTRUCTURE</span></div>
+            <small>PROPERTY INTELLIGENCE</small>
+            <h3>PropData</h3>
+            <p>Property identity, geometry, ownership, valuation, tax, comps, rent, market, risk, and provenance through one API.</p>
+            <div><b>166M+ PARCELS</b><span>Explore PropData →</span></div>
+          </a>
+          <a className="shield-card" href={propSecureUrl}>
+            <div className="shield-card-top"><ProductShield product="propsecure" /><span>ENTERPRISE SIGNALS</span></div>
+            <small>PROPERTY SURVEILLANCE</small>
+            <h3>PropSecure</h3>
+            <p>Continuous portfolio monitoring, verification, risk signals, and evidence-backed alerts engineered into enterprise workflows.</p>
+            <div><b>MONITOR → VERIFY</b><span>Explore PropSecure →</span></div>
+          </a>
+          <a className="shield-card" href={propSportsUrl}>
+            <div className="shield-card-top"><ProductShield product="propsports" /><span>LIVE DATA NETWORK</span></div>
+            <small>SPORTS INTELLIGENCE</small>
+            <h3>PropSports</h3>
+            <p>Live sports data, player props, Statcast, odds, schedules, weather, and production-ready endpoints for builders.</p>
+            <div><b>LIVE SPORTS API</b><span>Explore PropSports →</span></div>
+          </a>
+          <a className="shield-card parent" href={companyUrl}>
+            <div className="shield-card-top"><ProductShield product="platform" /><span>PARENT PLATFORM</span></div>
+            <small>INDEPENDENT DATA INFRASTRUCTURE</small>
+            <h3>PropTechUSA.ai</h3>
+            <p>The company and shared infrastructure network behind the PropData, PropSecure, PropSports, and Autocomplete product shields.</p>
+            <div><b>ONE ECOSYSTEM</b><span>Visit PropTechUSA.ai →</span></div>
+          </a>
+        </div>
+
+        <div className="network-proof">
+          <span><i /> Founder-led integration</span>
+          <span><i /> Independent infrastructure</span>
+          <span><i /> Shared reliability standard</span>
+          <span><i /> Product-specific contracts</span>
         </div>
       </section>
 
@@ -528,28 +792,29 @@ export default function Home() {
               <a href="#pricing">Pricing</a>
             </div>
             <div>
-              <span>DEVELOPERS</span>
+              <span>PROPDATA PLATFORM</span>
+              <a href={propDataUrl}>PropData home</a>
+              <a href={workspaceUrl}>API Workspace</a>
+              <a href={docsUrl}>API documentation</a>
               <a href="#developers">Decision response</a>
               <a href="#api-integration">API integration</a>
-              <a href={rapidApiUrl} target="_blank" rel="noreferrer">API access ↗</a>
-              <a href={docsUrl} target="_blank" rel="noreferrer">Documentation ↗</a>
-              <a href={statusUrl} target="_blank" rel="noreferrer">System status ↗</a>
             </div>
             <div>
-              <span>SOLUTIONS</span>
-              <a href="#homeowner-value">Homeowner value</a>
-              <a href="#instant-acquisition">Instant acquisition</a>
-              <a href="#home-services">Home services</a>
-              <a href="#ai-automation">AI + automation</a>
-              <a href="#workflow">How it works</a>
+              <span>SHIELD NETWORK</span>
+              <a href="#top">Autocomplete</a>
+              <a href={propDataUrl}>PropData</a>
+              <a href={propSecureUrl}>PropSecure</a>
+              <a href={propSportsUrl}>PropSports</a>
+              <a href={companyUrl}>PropTechUSA.ai</a>
             </div>
             <div>
-              <span>COMPANY</span>
-              <a href={companyUrl} target="_blank" rel="noreferrer">PropTechUSA ↗</a>
-              <a href="#architecture">Delivery models</a>
+              <span>ACCOUNT + COMPANY</span>
+              <a href={pricingUrl}>Plans from $79</a>
+              <a href={billingUrl} target="_blank" rel="noreferrer">Customer billing ↗</a>
+              <a href={statusUrl}>System status</a>
+              <a href="mailto:sales@proptechusa.ai">sales@proptechusa.ai</a>
               <a href="#faq">FAQ</a>
               <a href={calendlyUrl} target="_blank" rel="noreferrer">Book integration ↗</a>
-              <a href="#top">Back to top ↑</a>
             </div>
           </nav>
         </div>
@@ -557,7 +822,7 @@ export default function Home() {
         <div className="footer-bottom">
           <span>© 2026 PropTechUSA. All rights reserved.</span>
           <p>Illustrative values and offers shown. Production outputs follow each customer&apos;s approved data, rules, disclosures, and contract.</p>
-          <div><a href="#workflow">Coverage</a><a href="#faq">FAQ</a><a href="#top">Top ↑</a></div>
+          <div><a href={termsUrl}>Terms</a><a href={statusUrl}>Status</a><a href="#top">Top ↑</a></div>
         </div>
       </footer>
     </main>

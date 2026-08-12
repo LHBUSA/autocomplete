@@ -21,6 +21,11 @@ const instrumentSerif = Instrument_Serif({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://autocomplete.proptechusa.ai"),
+  applicationName: "PropData Autocomplete",
+  authors: [{ name: "PropTechUSA.ai", url: "https://www.proptechusa.ai" }],
+  creator: "PropTechUSA.ai",
+  publisher: "PropTechUSA.ai",
+  category: "Real Estate Technology",
   alternates: {
     canonical: "/",
   },
@@ -66,31 +71,83 @@ export const metadata: Metadata = {
 
 const structuredData = {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  name: "PropData Autocomplete to Instant Value",
-  applicationCategory: "BusinessApplication",
-  operatingSystem: "Web, API",
-  description:
-    "Address autocomplete, property resolution, instant valuation, and customizable instant-offer infrastructure powered by PropData.",
-  provider: {
-    "@type": "Organization",
-    name: "PropTechUSA.ai",
-    url: "https://www.proptechusa.ai",
-  },
-  url: "https://autocomplete.proptechusa.ai",
-  offers: {
-    "@type": "Offer",
-    price: "79",
-    priceCurrency: "USD",
-    description: "Self-serve API access from $79 per month; custom enterprise implementations available.",
-  },
-  featureList: [
-    "Address autocomplete",
-    "Parcel resolution",
-    "Instant property valuation",
-    "Custom instant-offer logic",
-    "Embeddable white-label experiences",
-    "Property data API",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://www.proptechusa.ai/#organization",
+      name: "PropTechUSA.ai",
+      url: "https://www.proptechusa.ai",
+      email: "sales@proptechusa.ai",
+      sameAs: [
+        "https://propdata.proptechusa.ai",
+        "https://propsecure.proptechusa.ai",
+        "https://propsports.proptechusa.ai",
+      ],
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://autocomplete.proptechusa.ai/#website",
+      name: "PropData Autocomplete to Instant Value",
+      url: "https://autocomplete.proptechusa.ai",
+      publisher: { "@id": "https://www.proptechusa.ai/#organization" },
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://autocomplete.proptechusa.ai/#software",
+      name: "PropData Autocomplete to Instant Value",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web, API",
+      description:
+        "Address autocomplete, property resolution, instant valuation, and customizable instant-offer infrastructure powered by PropData.",
+      provider: { "@id": "https://www.proptechusa.ai/#organization" },
+      url: "https://autocomplete.proptechusa.ai",
+      isPartOf: { "@id": "https://autocomplete.proptechusa.ai/#website" },
+      offers: {
+        "@type": "Offer",
+        price: "79",
+        priceCurrency: "USD",
+        description: "Self-serve API access from $79 per month; custom enterprise implementations available.",
+        url: "https://propdata.proptechusa.ai/#pricing",
+      },
+      featureList: [
+        "Address autocomplete",
+        "Canonical property resolution",
+        "Instant property valuation",
+        "Custom instant-offer logic",
+        "Embeddable white-label experiences",
+        "Property data API",
+      ],
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://autocomplete.proptechusa.ai/#faq",
+      mainEntity: [
+        {
+          "@type": "Question",
+          name: "How is this different from ordinary autocomplete?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "The workflow turns a selected address into a canonical property identity, then attaches approved property intelligence and the next decision.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Can the experience return a property value in real time?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "A production experience can return after canonical property selection using the valuation source and response contract configured for that deployment.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Can the instant-offer logic be customized?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Yes. Offer basis, eligibility, repairs, fees, market rules, disclosures, branding, and routing can be configured for each customer.",
+          },
+        },
+      ],
+    },
   ],
 };
 
